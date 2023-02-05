@@ -1,7 +1,7 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { getRecentEpisodes } from './controllers/AnimeController.js';
+const express = require('express');
+const cors = require('cors');
+const { getRecentEpisodes } = require('./controllers/AnimeController.js');
+const dotenv = require('dotenv');
 dotenv.config();
 const app = express();
 

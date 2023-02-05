@@ -1,11 +1,31 @@
-import puppeteer from 'puppeteer';
-
+const dotenv = require('dotenv');
+dotenv.config();
 // Base URL
 const url = 'https://samehadaku.win/';
 
-export const getRecentEpisodes = async (req, res) => {
+let chrome = {};
+let puppeteer;
+if (process.env.PRODUCTION) {
+  chrome = require('chrome-aws-lambda');
+  puppeteer = require('puppeteer-core');
+} else {
+  puppeteer = require('puppeteer');
+}
+
+const getRecentEpisodes = async (req, res) => {
+  let options = {};
+  if (process.env.PRODUCTION) {
+    options = {
+      args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
+      defaultViewport: chrome.defaultViewport,
+      executablePath: await chrome.executablePath,
+      handless: true,
+      ignoreHTTPSErrors: true,
+    };
+  }
+
   try {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch(options);
     const page = await browser.newPage();
     await page.goto(url);
     const liElements = await page.$$('#main > div:nth-child(11) > div.post-show > ul > li ');
@@ -32,6 +52,8 @@ export const getRecentEpisodes = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
+
+module.exports = { getRecentEpisodes };
 
 // (async () => {
 //   const browser = await puppeteer.launch();
