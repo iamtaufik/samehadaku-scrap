@@ -2,6 +2,25 @@ const dotenv = require('dotenv');
 dotenv.config();
 // Base URL
 const url = 'https://samehadaku.win/';
+const exePath = process.platform === 'win32' ? 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe' : process.platform === 'linux' ? '/usr/bin/google-chrome' : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+
+async function getOptions(isProduction) {
+  let options;
+  if (isProduction) {
+    options = {
+      args: chrome.args,
+      executablePath: await chrome.executablePath,
+      headless: chrome.headless,
+    };
+  } else {
+    options = {
+      args: [],
+      executablePath: exePath,
+      headless: true,
+    };
+  }
+  return options;
+}
 
 let chrome = {};
 let puppeteer;
@@ -13,17 +32,8 @@ if (process.env.PRODUCTION) {
 }
 
 const getRecentEpisodes = async (req, res) => {
-  let options = {};
-  if (process.env.PRODUCTION) {
-    options = {
-      args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath,
-      handless: true,
-      ignoreHTTPSErrors: true,
-      ignoreDefaultArgs: ['--disable-extensions'],
-    };
-  }
+  const isProduction = process.env.PRODUCTION;
+  const options = await getOptions(isProduction);
 
   try {
     const browser = await puppeteer.launch(options);
