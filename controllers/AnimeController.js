@@ -21,6 +21,7 @@ const getRecentEpisodes = async (req, res) => {
       executablePath: await chrome.executablePath,
       handless: true,
       ignoreHTTPSErrors: true,
+      ignoreDefaultArgs: ['--disable-extensions'],
     };
   }
 
